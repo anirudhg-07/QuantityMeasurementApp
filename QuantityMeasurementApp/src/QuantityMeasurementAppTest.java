@@ -1,133 +1,143 @@
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class QuantityMeasurementAppTest {
+public class QuantityWeightTest {
 
-    QuantityMeasurementApp.QuantityLength q;
+    // =========================
+    // 1. EQUALITY TESTS
+    // =========================
 
-    // ===================== UC1: Equality =====================
     @Test
-    void testEquality_SameFeetValue() {
-        var a = new QuantityMeasurementApp.QuantityLength(1.0,
-                QuantityMeasurementApp.LengthUnit.FEET);
-        var b = new QuantityMeasurementApp.QuantityLength(1.0,
-                QuantityMeasurementApp.LengthUnit.FEET);
-
-        assertTrue(a.equals(b));
+    public void testEquality_KilogramToKilogram() {
+        QuantityWeight w1 = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        QuantityWeight w2 = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        assertTrue(w1.equals(w2));
     }
 
     @Test
-    void testEquality_FeetAndInches() {
-        var feet = new QuantityMeasurementApp.QuantityLength(1.0,
-                QuantityMeasurementApp.LengthUnit.FEET);
-        var inches = new QuantityMeasurementApp.QuantityLength(12.0,
-                QuantityMeasurementApp.LengthUnit.INCHES);
-
-        assertTrue(feet.equals(inches));
-    }
-
-    // ===================== UC5: Conversion =====================
-    @Test
-    void testConvert_FeetToInches() {
-        var feet = new QuantityMeasurementApp.QuantityLength(1.0,
-                QuantityMeasurementApp.LengthUnit.FEET);
-
-        var result = feet.convertTo(QuantityMeasurementApp.LengthUnit.INCHES);
-
-        assertEquals(12.0, result.getValue(), 0.0001);
+    public void testEquality_KilogramToGram() {
+        QuantityWeight w1 = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        QuantityWeight w2 = new QuantityWeight(1000.0, WeightUnit.GRAM);
+        assertTrue(w1.equals(w2));
     }
 
     @Test
-    void testConvert_InchesToFeet() {
-        var inches = new QuantityMeasurementApp.QuantityLength(12.0,
-                QuantityMeasurementApp.LengthUnit.INCHES);
+    public void testEquality_KilogramToPound() {
+        QuantityWeight w1 = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        QuantityWeight w2 = new QuantityWeight(2.20462, WeightUnit.POUND);
+        assertTrue(w1.equals(w2));
+    }
 
-        var result = inches.convertTo(QuantityMeasurementApp.LengthUnit.FEET);
+    // =========================
+    // 2. CONVERSION TESTS
+    // =========================
 
+    @Test
+    public void testConvert_KgToGram() {
+        QuantityWeight w = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        QuantityWeight result = w.convertTo(WeightUnit.GRAM);
+        assertEquals(1000.0, result.getValue(), 0.0001);
+    }
+
+    @Test
+    public void testConvert_GramToKg() {
+        QuantityWeight w = new QuantityWeight(1000.0, WeightUnit.GRAM);
+        QuantityWeight result = w.convertTo(WeightUnit.KILOGRAM);
         assertEquals(1.0, result.getValue(), 0.0001);
     }
 
-    // ===================== UC6: Addition =====================
     @Test
-    void testAddition_SameUnitFeet() {
-        var a = new QuantityMeasurementApp.QuantityLength(1.0,
-                QuantityMeasurementApp.LengthUnit.FEET);
-        var b = new QuantityMeasurementApp.QuantityLength(2.0,
-                QuantityMeasurementApp.LengthUnit.FEET);
+    public void testConvert_PoundToKg() {
+        QuantityWeight w = new QuantityWeight(2.20462, WeightUnit.POUND);
+        QuantityWeight result = w.convertTo(WeightUnit.KILOGRAM);
+        assertEquals(1.0, result.getValue(), 0.0001);
+    }
 
-        var result = a.add(b, QuantityMeasurementApp.LengthUnit.FEET);
+    // =========================
+    // 3. ADDITION TESTS
+    // =========================
+
+    @Test
+    public void testAdd_SameUnit() {
+        QuantityWeight w1 = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        QuantityWeight w2 = new QuantityWeight(2.0, WeightUnit.KILOGRAM);
+
+        QuantityWeight result = w1.add(w2);
+
+        assertEquals(3.0, result.getValue(), 0.0001);
+        assertEquals(WeightUnit.KILOGRAM, result.getUnit());
+    }
+
+    @Test
+    public void testAdd_CrossUnit_KgPlusGram() {
+        QuantityWeight w1 = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        QuantityWeight w2 = new QuantityWeight(1000.0, WeightUnit.GRAM);
+
+        QuantityWeight result = w1.add(w2);
+
+        assertEquals(2.0, result.getValue(), 0.0001);
+    }
+
+    // =========================
+    // 4. ADDITION WITH TARGET UNIT
+    // =========================
+
+    @Test
+    public void testAdd_TargetUnit_Gram() {
+        QuantityWeight w1 = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        QuantityWeight w2 = new QuantityWeight(1000.0, WeightUnit.GRAM);
+
+        QuantityWeight result = w1.add(w2, WeightUnit.GRAM);
+
+        assertEquals(2000.0, result.getValue(), 0.0001);
+        assertEquals(WeightUnit.GRAM, result.getUnit());
+    }
+
+    @Test
+    public void testAdd_TargetUnit_Pound() {
+        QuantityWeight w1 = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        QuantityWeight w2 = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+
+        QuantityWeight result = w1.add(w2, WeightUnit.POUND);
+
+        assertEquals(4.40924, result.getValue(), 0.0001);
+    }
+
+    // =========================
+    // 5. EDGE CASES
+    // =========================
+
+    @Test
+    public void testAdd_ZeroValue() {
+        QuantityWeight w1 = new QuantityWeight(5.0, WeightUnit.KILOGRAM);
+        QuantityWeight w2 = new QuantityWeight(0.0, WeightUnit.GRAM);
+
+        QuantityWeight result = w1.add(w2);
+
+        assertEquals(5.0, result.getValue(), 0.0001);
+    }
+
+    @Test
+    public void testNegativeValues() {
+        QuantityWeight w1 = new QuantityWeight(5.0, WeightUnit.KILOGRAM);
+        QuantityWeight w2 = new QuantityWeight(-2.0, WeightUnit.KILOGRAM);
+
+        QuantityWeight result = w1.add(w2);
 
         assertEquals(3.0, result.getValue(), 0.0001);
     }
 
-    @Test
-    void testAddition_FeetAndInches() {
-        var feet = new QuantityMeasurementApp.QuantityLength(1.0,
-                QuantityMeasurementApp.LengthUnit.FEET);
-        var inches = new QuantityMeasurementApp.QuantityLength(12.0,
-                QuantityMeasurementApp.LengthUnit.INCHES);
+    // =========================
+    // 6. EXCEPTION TESTS
+    // =========================
 
-        var result = feet.add(inches, QuantityMeasurementApp.LengthUnit.FEET);
-
-        assertEquals(2.0, result.getValue(), 0.0001);
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullUnit() {
+        new QuantityWeight(1.0, null);
     }
 
-    // ===================== UC7: Target Unit Addition =====================
-    @Test
-    void testAddition_WithYards() {
-        var feet = new QuantityMeasurementApp.QuantityLength(1.0,
-                QuantityMeasurementApp.LengthUnit.FEET);
-        var inches = new QuantityMeasurementApp.QuantityLength(12.0,
-                QuantityMeasurementApp.LengthUnit.INCHES);
-
-        var result = feet.add(inches, QuantityMeasurementApp.LengthUnit.YARDS);
-
-        assertEquals(0.6667, result.getValue(), 0.01);
-    }
-
-    // ===================== UC4: Extra Units =====================
-    @Test
-    void testYardToFeetAddition() {
-        var yard = new QuantityMeasurementApp.QuantityLength(1.0,
-                QuantityMeasurementApp.LengthUnit.YARDS);
-        var feet = new QuantityMeasurementApp.QuantityLength(3.0,
-                QuantityMeasurementApp.LengthUnit.FEET);
-
-        var result = yard.add(feet, QuantityMeasurementApp.LengthUnit.YARDS);
-
-        assertEquals(2.0, result.getValue(), 0.0001);
-    }
-
-    @Test
-    void testCentimeterToInchConversion() {
-        var cm = new QuantityMeasurementApp.QuantityLength(2.54,
-                QuantityMeasurementApp.LengthUnit.CENTIMETERS);
-
-        var result = cm.convertTo(QuantityMeasurementApp.LengthUnit.INCHES);
-
-        assertEquals(1.0, result.getValue(), 0.01);
-    }
-
-    // ===================== EDGE CASES =====================
-    @Test
-    void testNullUnitThrowsException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new QuantityMeasurementApp.QuantityLength(1.0, null));
-    }
-
-    @Test
-    void testAdditionWithNull() {
-        var feet = new QuantityMeasurementApp.QuantityLength(1.0,
-                QuantityMeasurementApp.LengthUnit.FEET);
-
-        assertThrows(IllegalArgumentException.class,
-                () -> feet.add(null, QuantityMeasurementApp.LengthUnit.FEET));
-    }
-
-    @Test
-    void testInvalidValueThrowsException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new QuantityMeasurementApp.QuantityLength(Double.NaN,
-                        QuantityMeasurementApp.LengthUnit.FEET));
+    @Test(expected = IllegalArgumentException.class)
+    public void testNaNValue() {
+        new QuantityWeight(Double.NaN, WeightUnit.KILOGRAM);
     }
 }
