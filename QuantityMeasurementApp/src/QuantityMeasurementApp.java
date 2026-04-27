@@ -1,5 +1,5 @@
 /**
- * UC6: Supports equality, conversion, and addition of length quantities
+ * UC7: Addition with explicit target unit support
  */
 public class QuantityMeasurementApp {
 
@@ -46,40 +46,46 @@ public class QuantityMeasurementApp {
             return unit.toFeet(value);
         }
 
-        // ----------- ADDITION (INSTANCE METHOD) -----------
+        // ----------- PRIVATE UTILITY METHOD (DRY) -----------
 
-        /**
-         * Adds another Quantity and returns result in THIS unit
-         */
-        public Quantity add(Quantity other) {
-            if (other == null) {
-                throw new IllegalArgumentException("Second operand cannot be null");
-            }
-
-            double sumFeet = this.toFeet() + other.toFeet();
-            double resultValue = this.unit.fromFeet(sumFeet);
-
-            return new Quantity(resultValue, this.unit);
+        private static double addInFeet(Quantity q1, Quantity q2) {
+            return q1.toFeet() + q2.toFeet();
         }
 
-        // ----------- STATIC ADD (OVERLOADED) -----------
+        // ----------- UC6 (existing) -----------
+
+        public Quantity add(Quantity other) {
+            if (other == null) throw new IllegalArgumentException("Second operand cannot be null");
+
+            double sumFeet = addInFeet(this, other);
+            double result = this.unit.fromFeet(sumFeet);
+
+            return new Quantity(result, this.unit);
+        }
+
+        // ----------- UC7 (explicit target unit) -----------
 
         public static Quantity add(Quantity q1, Quantity q2, LengthUnit targetUnit) {
-            if (q1 == null || q2 == null || targetUnit == null) {
-                throw new IllegalArgumentException("Arguments cannot be null");
-            }
+            if (q1 == null || q2 == null)
+                throw new IllegalArgumentException("Operands cannot be null");
 
-            double sumFeet = q1.toFeet() + q2.toFeet();
+            if (targetUnit == null)
+                throw new IllegalArgumentException("Target unit cannot be null");
+
+            double sumFeet = addInFeet(q1, q2);
             double result = targetUnit.fromFeet(sumFeet);
 
             return new Quantity(result, targetUnit);
         }
 
+        // Overloaded version for raw values
         public static Quantity add(double v1, LengthUnit u1,
                                    double v2, LengthUnit u2,
                                    LengthUnit targetUnit) {
 
-            return add(new Quantity(v1, u1), new Quantity(v2, u2), targetUnit);
+            return add(new Quantity(v1, u1),
+                    new Quantity(v2, u2),
+                    targetUnit);
         }
 
         // ----------- EQUALITY -----------
@@ -104,32 +110,26 @@ public class QuantityMeasurementApp {
         }
     }
 
-    // ----------- DEMO METHODS -----------
-
-    public static void demonstrateAddition(Quantity q1, Quantity q2) {
-        System.out.println("add(" + q1 + ", " + q2 + ") → " + q1.add(q2));
-    }
+    // ----------- DEMO -----------
 
     public static void main(String[] args) {
 
-        demonstrateAddition(
-                new Quantity(1.0, LengthUnit.FEET),
-                new Quantity(2.0, LengthUnit.FEET));
+        System.out.println(
+                Quantity.add(
+                        new Quantity(1.0, LengthUnit.FEET),
+                        new Quantity(12.0, LengthUnit.INCH),
+                        LengthUnit.FEET));
 
-        demonstrateAddition(
-                new Quantity(1.0, LengthUnit.FEET),
-                new Quantity(12.0, LengthUnit.INCH));
+        System.out.println(
+                Quantity.add(
+                        new Quantity(1.0, LengthUnit.FEET),
+                        new Quantity(12.0, LengthUnit.INCH),
+                        LengthUnit.INCH));
 
-        demonstrateAddition(
-                new Quantity(12.0, LengthUnit.INCH),
-                new Quantity(1.0, LengthUnit.FEET));
-
-        demonstrateAddition(
-                new Quantity(1.0, LengthUnit.YARD),
-                new Quantity(3.0, LengthUnit.FEET));
-
-        demonstrateAddition(
-                new Quantity(2.54, LengthUnit.CENTIMETER),
-                new Quantity(1.0, LengthUnit.INCH));
+        System.out.println(
+                Quantity.add(
+                        new Quantity(1.0, LengthUnit.FEET),
+                        new Quantity(12.0, LengthUnit.INCH),
+                        LengthUnit.YARD));
     }
 }
